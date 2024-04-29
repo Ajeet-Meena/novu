@@ -1,42 +1,28 @@
-version: '3.9'
+version: "3.9"
 name: novu
 services:
   redis:
-    image: 'redis:alpine'
+    image: "redis:alpine"
     container_name: redis
     restart: unless-stopped
     logging:
-      driver: 'none'
-  mongodb:
-    image: mongo
-    container_name: mongodb
-    restart: unless-stopped
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '50m'
-        max-file: '5'
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - mongodb:/data/db
+      driver: "none"
     ports:
-      - 27017:27017
+      - "6379:6379"
+    expose:
+      - "6379"
   api:
-    image: 'ghcr.io/novuhq/novu/api:0.24.0'
+    image: "ghcr.io/novuhq/novu/api:0.24.0"
     depends_on:
       - mongodb
       - redis
     container_name: api
     restart: unless-stopped
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '50m'
-        max-file: '5'
+        max-size: "50m"
+        max-file: "5"
     environment:
       NODE_ENV: ${NODE_ENV}
       API_ROOT_URL: ${API_ROOT_URL}
@@ -64,19 +50,21 @@ services:
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       API_CONTEXT_PATH: ${API_CONTEXT_PATH}
     ports:
-      - '3000:3000'
+      - "3000:3000"
+    expose:
+      - "3000"
   worker:
-    image: 'ghcr.io/novuhq/novu/worker:0.24.0'
+    image: "ghcr.io/novuhq/novu/worker:0.24.0"
     depends_on:
       - mongodb
       - redis
     container_name: worker
     restart: unless-stopped
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '50m'
-        max-file: '5'
+        max-size: "50m"
+        max-file: "5"
     environment:
       NODE_ENV: ${NODE_ENV}
       MONGO_URL: ${MONGO_URL}
@@ -99,17 +87,17 @@ services:
       BROADCAST_QUEUE_CHUNK_SIZE: ${BROADCAST_QUEUE_CHUNK_SIZE}
       MULTICAST_QUEUE_CHUNK_SIZE: ${MULTICAST_QUEUE_CHUNK_SIZE}
   ws:
-    image: 'ghcr.io/novuhq/novu/ws:0.24.0'
+    image: "ghcr.io/novuhq/novu/ws:0.24.0"
     depends_on:
       - mongodb
       - redis
     container_name: ws
     restart: unless-stopped
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '50m'
-        max-file: '5'
+        max-size: "50m"
+        max-file: "5"
     environment:
       PORT: ${WS_PORT}
       NODE_ENV: ${NODE_ENV}
@@ -123,29 +111,33 @@ services:
       NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME}
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
     ports:
-      - '3002:3002'
+      - "3002:3002"
+    expose:
+      - "3002"
   web:
-    image: 'ghcr.io/novuhq/novu/web:0.24.0'
+    image: "ghcr.io/novuhq/novu/web:0.24.0"
     depends_on:
       - api
       - worker
     container_name: web
     restart: unless-stopped
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '50m'
-        max-file: '5'
+        max-size: "50m"
+        max-file: "5"
     environment:
       REACT_APP_API_URL: ${API_ROOT_URL}
       REACT_APP_ENVIRONMENT: ${NODE_ENV}
       REACT_APP_WIDGET_EMBED_PATH: ${WIDGET_EMBED_PATH}
-      REACT_APP_DOCKER_HOSTED_ENV: 'true'
+      REACT_APP_DOCKER_HOSTED_ENV: "true"
       REACT_APP_WS_URL: ${REACT_APP_WS_URL}
     ports:
       - 4200:4200
+    expose:
+      - "3002"
   widget:
-    image: 'ghcr.io/novuhq/novu/widget:0.24.0'
+    image: "ghcr.io/novuhq/novu/widget:0.24.0"
     depends_on:
       - api
       - worker
@@ -153,10 +145,10 @@ services:
     container_name: widget
     restart: unless-stopped
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '50m'
-        max-file: '5'
+        max-size: "50m"
+        max-file: "5"
     environment:
       REACT_APP_API_URL: ${API_ROOT_URL}
       REACT_APP_WS_URL: ${REACT_APP_WS_URL}
@@ -164,22 +156,26 @@ services:
       WIDGET_CONTEXT_PATH: ${WIDGET_CONTEXT_PATH}
     ports:
       - 4500:4500
+    expose:
+      - "4500"
   embed:
     depends_on:
       - widget
-    image: 'ghcr.io/novuhq/novu/embed:0.24.0'
+    image: "ghcr.io/novuhq/novu/embed:0.24.0"
     container_name: embed
     restart: unless-stopped
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
-        max-size: '50m'
-        max-file: '5'
+        max-size: "50m"
+        max-file: "5"
     environment:
       WIDGET_URL: ${WIDGET_URL}
       NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME}
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
     ports:
       - 4701:4701
+    expose:
+      - "4701"
 volumes:
   mongodb: ~
